@@ -18,7 +18,7 @@ public class Seal implements ApplicationListener
 {
 
 	static final int WIDTH = 480;
-	static final int HEIGHT = 480;
+	static final int HEIGHT = 320;
 	
 	private Texture buzzImage;
 	private Texture map;
@@ -65,22 +65,22 @@ public class Seal implements ApplicationListener
 	public void render() 
 	{
 		handleInput();
-		GL10 gl = Gdx.graphics.getGL10();       // #2
+		GL10 gl = Gdx.graphics.getGL10();     
          
 	    // Camera --------------------- /
-	    gl.glClear(GL10.GL_COLOR_BUFFER_BIT);   // #3
+	    gl.glClear(GL10.GL_COLOR_BUFFER_BIT); 
 	    gl.glViewport((int) glViewport.x, (int) glViewport.y,
-	    		(int) glViewport.width, (int) glViewport.height);       // #4
+	    		(int) glViewport.width, (int) glViewport.height);     
 	                
-	    camera.update();                   // #5
-	    camera.apply(gl);                  // #6
+	    camera.update();                 
+	    camera.apply(gl);
 
 	    // Texturing --------------------- /
-	    gl.glActiveTexture(GL10.GL_TEXTURE0);   // #7
-	    gl.glEnable(GL10.GL_TEXTURE_2D);        // #8
-	    map.bind();                         // #9
+	    gl.glActiveTexture(GL10.GL_TEXTURE0);  
+	    gl.glEnable(GL10.GL_TEXTURE_2D);    
+	    map.bind();                
 	                
-	    mesh.render(GL10.GL_TRIANGLES);         // #10
+	    mesh.render(GL10.GL_TRIANGLES);
 		
 	}
 	
@@ -89,9 +89,8 @@ public class Seal implements ApplicationListener
 		if(Gdx.input.isTouched()) 
 		{
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-			camera.unproject(touchPos);
 			
-			if(touchPos.x < 240 && touchPos.y < 240) 	//if screen is touched in bottom left quadrant
+			if(touchPos.x < WIDTH/2 && touchPos.y < HEIGHT/2) 	//if screen is touched in bottom left quadrant
 			{
 				if(touchPos.x > touchPos.y) 			//if touched in bottom triangle, move down
 				{
@@ -105,9 +104,9 @@ public class Seal implements ApplicationListener
 				}
 			}
 			
-			else if(touchPos.x < 240) 					//if screen is touched in top left quadrant
+			else if(touchPos.x < WIDTH/2) 					//if screen is touched in top left quadrant
 			{
-				if(touchPos.x > (480 - touchPos.y)) 	//move up
+				if(touchPos.x > (HEIGHT - touchPos.y)) 	//move up
 				{	
 					if(camera.position.y < 1024)		//check
 						camera.translate(0,3,0);
@@ -119,9 +118,9 @@ public class Seal implements ApplicationListener
 				}
 			}
 			
-			else if(touchPos.y < 240) 					//if screen is touched in bottom right quadrant
+			else if(touchPos.y < HEIGHT/2) 					//if screen is touched in bottom right quadrant
 			{
-				if(touchPos.y > (480 - touchPos.x)) 	//move right
+				if(touchPos.y > (WIDTH - touchPos.x)) 	//move right
 				{
 					if(camera.position.x < 1024)
 						camera.translate(3,0,0);

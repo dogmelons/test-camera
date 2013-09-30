@@ -1,5 +1,10 @@
 package edu.smcm.ButterSealGame;
 
+import android.content.Context;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.WindowManager;
+
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
@@ -11,48 +16,55 @@ import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.tiled.TileAtlas;
+import com.badlogic.gdx.graphics.g2d.tiled.TileMapRenderer;
+import com.badlogic.gdx.graphics.g2d.tiled.TiledLoader;
+import com.badlogic.gdx.graphics.g2d.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 public class Seal implements ApplicationListener
 {
-
-	static final int WIDTH = 480;
-	static final int HEIGHT = 320;
+	private int WIDTH;
+	private int HEIGHT;
+	private int cWIDTH = 400;
+	private int cHEIGHT = 240;
+	private int mWIDTH;
+	private int mHEIGHT;
 	
 	private Texture buzzImage;
-	private Texture map;
 	private Music DreamMusic;
 	private OrthographicCamera camera;
 	private SpriteBatch batch;
-	private Mesh mesh;
-	private Rectangle glViewport;
 	private Vector3 touchPos;
+	private TileMapRenderer tileMapRenderer;
 	
 	@Override
 	public void create() 
 	{
+		WIDTH = Gdx.graphics.getWidth();
+		HEIGHT = Gdx.graphics.getHeight();
+		
+		Gdx.gl.glClearColor(0f,0,0.0f,1);
+		
 		buzzImage = new Texture(Gdx.files.internal("buzz.png"));
 		DreamMusic = Gdx.audio.newMusic(Gdx.files.internal("Dream.mp3"));
-		map = new Texture(Gdx.files.internal("sc_map.png"));
 		
-		DreamMusic.setLooping(true);
-		DreamMusic.play();
+		touchPos = new Vector3();
 		
-		mesh = new Mesh(true, 4, 6, new VertexAttribute(VertexAttributes.Usage.Position, 3, "attr._position"),
-						new VertexAttribute(Usage.TextureCoordinates, 2, "attr_texCoords"));
+		TiledMap tiledMap = TiledLoader.createMap(Gdx.files.internal("maps/desertTest.tmx"));
+		TileAtlas tileAtlas = new TileAtlas(tiledMap, Gdx.files.internal("maps"));
+		tileMapRenderer = new TileMapRenderer(tiledMap, tileAtlas, 12, 12);
 		
-		mesh.setVertices(new float[] {
-						-1024f, -1024f, 0, 0, 1,
-						 1024f, -1024f, 0, 1, 1,
-						 1024f,  1024f, 0, 1, 0,
-						-1024f,  1024f, 0, 0, 0
-		});
-		mesh.setIndices(new short[] {0,1,2,2,3,0});
+		mWIDTH = tiledMap.width * tiledMap.tileWidth;
+		mHEIGHT = tiledMap.height * tiledMap.tileHeight;
 		
-		camera = new OrthographicCamera(WIDTH, HEIGHT);
-		camera.position.set(WIDTH/2, HEIGHT/2, 0);
-		glViewport = new Rectangle(0, 0, WIDTH, HEIGHT);
+		//DreamMusic.setLooping(true);
+		//DreamMusic.play();
+		
+		camera = new OrthographicCamera();
+		camera.setToOrtho(false, cWIDTH*2, cHEIGHT*2);
+		camera.position.set(cWIDTH, cHEIGHT, 0);
 	}
 
 	@Override
@@ -65,22 +77,12 @@ public class Seal implements ApplicationListener
 	public void render() 
 	{
 		handleInput();
-		GL10 gl = Gdx.graphics.getGL10();     
-         
-	    // Camera --------------------- /
-	    gl.glClear(GL10.GL_COLOR_BUFFER_BIT); 
-	    gl.glViewport((int) glViewport.x, (int) glViewport.y,
-	    		(int) glViewport.width, (int) glViewport.height);     
-	                
-	    camera.update();                 
-	    camera.apply(gl);
 
-	    // Texturing --------------------- /
-	    gl.glActiveTexture(GL10.GL_TEXTURE0);  
-	    gl.glEnable(GL10.GL_TEXTURE_2D);    
-	    map.bind();                
-	                
-	    mesh.render(GL10.GL_TRIANGLES);
+		
+		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT );
+		camera.update();
+		tileMapRenderer.render(camera);
+		
 		
 	}
 	
@@ -90,59 +92,59 @@ public class Seal implements ApplicationListener
 		{
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			
-			if(touchPos.x < WIDTH/2 && touchPos.y < HEIGHT/2) 	//if screen is touched in bottom left quadrant
+			if((touchPos.x < (WIDTH/2)) && (touchPos.y < (HEIGHT/2))) 	//if screen is touched in top left quadrant
 			{
-				if(touchPos.x > touchPos.y) 			//if touched in bottom triangle, move down
+				if(touchPos.x > touchPos.y) 			//move up
 				{
-					if(camera.position.y < 1024)		//out of bounds check
-						camera.translate(0, -3, 0);
+					if(camera.position.y < (mHEIGHT-cHEIGHT))		//out of bounds check
+						camera.translate(0, 3, 0);
 				}
-				else 									//if touched in top triangle, move left
+				else 									//move left
 				{
-					if(camera.position.x > 0)			//out of bounds check
+					if(camera.position.x > (cWIDTH))			//out of bounds check
 						camera.translate(-3, 0, 0);
 				}
 			}
 			
-			else if(touchPos.x < WIDTH/2) 					//if screen is touched in top left quadrant
+			else if(touchPos.x < WIDTH/2) 					//if screen is touched in bottom left quadrant
 			{
-				if(touchPos.x > (HEIGHT - touchPos.y)) 	//move up
+				if(touchPos.x > (HEIGHT - touchPos.y)) 	//move down <------------
 				{	
-					if(camera.position.y < 1024)		//check
-						camera.translate(0,3,0);
+					if(camera.position.y > (cHEIGHT))			//check
+						camera.translate(0, -3, 0);
 				}
 				else 									//move left
 				{
-					if(camera.position.x > 0)			//check
-						camera.translate(-3,0,0);
+					if(camera.position.x > (cWIDTH))			//check
+						camera.translate(-3, 0, 0);
 				}
 			}
 			
-			else if(touchPos.y < HEIGHT/2) 					//if screen is touched in bottom right quadrant
+			else if(touchPos.y < HEIGHT/2) 					//if screen is touched in top right quadrant
 			{
 				if(touchPos.y > (WIDTH - touchPos.x)) 	//move right
 				{
-					if(camera.position.x < 1024)
-						camera.translate(3,0,0);
+					if(camera.position.x < (mWIDTH-cWIDTH))
+						camera.translate(3, 0, 0);
 				}
-				else 									//move down
+				else 									//move up <-----------------
 				{
-					if(camera.position.y > 0)
-						camera.translate(0,-3,0);
+					if(camera.position.y < (mHEIGHT-cHEIGHT))
+						camera.translate(0, 3, 0);
 				}
 			}
 			
-			else 										//if screen is touched in top right quadrant
+			else 										//if screen is touched in bottom right quadrant
 			{										
-				if(touchPos.x > touchPos.y) 			//move right
+				if((HEIGHT - touchPos.y) < (WIDTH - touchPos.x)) 			//move down
 				{
-					if(camera.position.x < 1024)
-						camera.translate(3,0,0);
+					if(camera.position.y > (cHEIGHT))
+						camera.translate(0, -3, 0);
 				}
-				else 									//move up
+				else 									//move right <--------------
 				{
-					if(camera.position.y < 1024)
-						camera.translate(0,3,0);
+					if(camera.position.x < (mWIDTH-cWIDTH))
+					camera.translate(3, 0, 0);
 				}
 			}
 		}

@@ -24,17 +24,17 @@ import com.badlogic.gdx.math.Vector3;
 
 public class Seal implements ApplicationListener
 {
-	private int WIDTH;
-	private int HEIGHT;
-	private int cWIDTH = 300;
-	private int cHEIGHT = 180;
-	private int mWIDTH;
-	private int mHEIGHT;
+	private int width;
+	private int height;
+	private int camWidth = 300;
+	private int camHeight = 180;
+	private int mapWidth;
+	private int mapHeight;
 	
-	private int dHEIGHT;
-	private int dWIDTH;
-	private int dHEIGHT3;
-	private int dWIDTH3;
+	private int dpadHeight;
+	private int dpadWidth;
+	private int dpadHeight3;
+	private int dpadWidth3;
 	
 	private Texture pikaImage;
 	private Texture dpadImage;
@@ -48,24 +48,24 @@ public class Seal implements ApplicationListener
 	@Override
 	public void create() 
 	{
-		WIDTH = Gdx.graphics.getWidth();
-		HEIGHT = Gdx.graphics.getHeight();
+		width = Gdx.graphics.getWidth();
+		height = Gdx.graphics.getHeight();
 		
 		Gdx.gl.glClearColor(0f,0,0.0f,1);
 		
 		pikaImage = new Texture(Gdx.files.internal("pika.png"));
 		dpadImage = new Texture(Gdx.files.internal("dpad.png"));
-		dHEIGHT = dpadImage.getHeight();
-		dWIDTH = dpadImage.getWidth();
-		dHEIGHT3 = dHEIGHT/3;
-		dWIDTH3 = dWIDTH/3;
+		dpadHeight = dpadImage.getHeight();
+		dpadWidth = dpadImage.getWidth();
+		dpadHeight3 = dpadHeight/3;
+		dpadWidth3 = dpadWidth/3;
 		DreamMusic = Gdx.audio.newMusic(Gdx.files.internal("Dream.mp3"));
 		
 		dpad = new Rectangle();
 		dpad.x = 0;
 		dpad.y = 0;
-		dpad.width = dWIDTH;
-		dpad.height = dHEIGHT;
+		dpad.width = dpadWidth;
+		dpad.height = dpadHeight;
 		
 		batch = new SpriteBatch();
 		
@@ -75,15 +75,15 @@ public class Seal implements ApplicationListener
 		TileAtlas tileAtlas = new TileAtlas(tiledMap, Gdx.files.internal("collisionmap"));
 		tileMapRenderer = new TileMapRenderer(tiledMap, tileAtlas, 12, 12);
 		
-		mWIDTH = tiledMap.width * tiledMap.tileWidth;
-		mHEIGHT = tiledMap.height * tiledMap.tileHeight;
+		mapWidth = tiledMap.width * tiledMap.tileWidth;
+		mapHeight = tiledMap.height * tiledMap.tileHeight;
 		
 		//DreamMusic.setLooping(true);
 		//DreamMusic.play();
 		
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, cWIDTH*2, cHEIGHT*2);
-		camera.position.set(cWIDTH, cHEIGHT, 0);
+		camera.setToOrtho(false, camWidth*2, camHeight*2);
+		camera.position.set(camWidth, camHeight, 0);
 	}
 
 	@Override
@@ -113,67 +113,67 @@ public class Seal implements ApplicationListener
 			touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
 			
 			//move left
-			if(touchPos.y > (HEIGHT - (dHEIGHT3*2)) && (touchPos.y < (HEIGHT - dHEIGHT3)) && (touchPos.x < dWIDTH3))
+			if(touchPos.y > (height - (dpadHeight3*2)) && (touchPos.y < (height - dpadHeight3)) && (touchPos.x < dpadWidth3))
 			{
-				if(camera.position.x > (cWIDTH))					//check
+				if(camera.position.x > (camWidth))					//check
 					camera.translate(-3, 0, 0);
 			}
 			//move right
-			else if(touchPos.y > (HEIGHT - (dHEIGHT3*2)) && (touchPos.y < (HEIGHT - dHEIGHT3)) && (touchPos.x > dWIDTH3*2)
-					&& (touchPos.x < dWIDTH))
+			else if(touchPos.y > (height - (dpadHeight3*2)) && (touchPos.y < (height - dpadHeight3)) && (touchPos.x > dpadWidth3*2)
+					&& (touchPos.x < dpadWidth))
 			{
-				if(camera.position.x < (mWIDTH-cWIDTH))
+				if(camera.position.x < (mapWidth-camWidth))
 					camera.translate(3, 0, 0);
 			}
 			//move up
-			else if((touchPos.y > (HEIGHT - dHEIGHT)) && (touchPos.y < (HEIGHT - dHEIGHT3*2)) && (touchPos.x > dWIDTH3)
-					&& (touchPos.x < (dWIDTH3*2)))
+			else if((touchPos.y > (height - dpadHeight)) && (touchPos.y < (height - dpadHeight3*2)) && (touchPos.x > dpadWidth3)
+					&& (touchPos.x < (dpadWidth3*2)))
 			{
-				if(camera.position.y < (mHEIGHT-cHEIGHT))			//out of bounds check
+				if(camera.position.y < (mapHeight-camHeight))			//out of bounds check
 					camera.translate(0, 3, 0);
 			}
 			//move down
-			else if((touchPos.y > (HEIGHT - dHEIGHT3)) && (touchPos.x > dWIDTH3) && (touchPos.x < (dWIDTH3*2)))
+			else if((touchPos.y > (height - dpadHeight3)) && (touchPos.x > dpadWidth3) && (touchPos.x < (dpadWidth3*2)))
 			{
-				if(camera.position.y > (cHEIGHT))
+				if(camera.position.y > (camHeight))
 					camera.translate(0, -3, 0);	
 			}
 						
 			
-			/*if(touchPos.y < (HEIGHT/2))
+			/*if(touchPos.y < (height/2))
 			{		
 				if(touchPos.x < touchPos.y)								//move left
 				{
-					if(camera.position.x > (cWIDTH))					//out of bounds check
+					if(camera.position.x > (camWidth))					//out of bounds check
 						camera.translate(-3, 0, 0);
 				}
-				else if(touchPos.y > (WIDTH - touchPos.x)) 				//move right
+				else if(touchPos.y > (width - touchPos.x)) 				//move right
 				{
-					if(camera.position.x < (mWIDTH-cWIDTH))
+					if(camera.position.x < (mapWidth-camWidth))
 						camera.translate(3, 0, 0);
 				}
 				else													//move up
 				{
-					if(camera.position.y < (mHEIGHT-cHEIGHT))			//out of bounds check
+					if(camera.position.y < (mapHeight-camHeight))			//out of bounds check
 						camera.translate(0, 3, 0);
 				}
 			}
 			
 			else
 			{
-				if(touchPos.x < (HEIGHT - touchPos.y))					//move left
+				if(touchPos.x < (height - touchPos.y))					//move left
 				{
-					if(camera.position.x > (cWIDTH))					//check
+					if(camera.position.x > (camWidth))					//check
 						camera.translate(-3, 0, 0);
 				}
-				else if((HEIGHT - touchPos.y) < (WIDTH - touchPos.x))	//move down
+				else if((height - touchPos.y) < (width - touchPos.x))	//move down
 				{
-					if(camera.position.y > (cHEIGHT))
+					if(camera.position.y > (camHeight))
 						camera.translate(0, -3, 0);					
 				}
 				else													//move right
 				{
-					if(camera.position.x < (mWIDTH-cWIDTH))
+					if(camera.position.x < (mapWidth-camWidth))
 						camera.translate(3, 0, 0);
 				}
 			}*/
